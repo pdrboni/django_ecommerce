@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load omfilters %}
+
+{% block title %}{{ product.name }} | {% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg">
+        <div class="row no-gutters">
+            <div class="col-lg-12">
+                {% if product.image %}
+                <img class="img-fluid" src="{{ product.image.url }}">
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg">
+        <div class="mt-4 mt-lg-0">
+            <h1 class="h2">{{ product.name }}</h1>
+            <p class="lead">{{ product.short_description }}</p>
+            <form action="{% url 'product:addtocart' %}" id="form-add-to-cart">
+                <div class="form-group">
+                    {% if product.variation_set.all %}
+                        <select id="select-variations" name="vid" class="form-control form-control-lg">
+                            <option value="" disabled selected>Choose an option</option>
+                            
+                            {% for variation in product.variation_set.all %}
+
+                            {% if variation.promotional_price %}
+                            <option data-price="{{ variation.price|formata_preco }}"
+                                data-promotional-price="{{ variation.promotional_price|formata_preco }}"
+                                value="{{ variation.id }}">
+                                {% if variation.name %}
+                                {{ variation.name }}
+                                {% else %}
+                                {{ variation }}
+                                {% endif %}
+                            </option>
+                            {% else %}
+                            <option data-price="{{ variation.price|formata_preco }}" value="{{ variation.id }}">
+                                {% if variation.name %}
+                                {{ variation.name }}
+                                {% else %}
+                                {{ variation }}
+                                {% endif %}
+                            </option>
+                            {% endif %}
+
+                            {% endfor %}
+                        </select>
+                    {% else %}
+                    <select id="select-variations" name="vid2" class="form-control form-control-lg">
+                        <option value="{{product.id}}">No variations</option>
+                    </select>
+                    {% endif %}
+                </div>
+
+
+                <div class="text-left">
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">
+                        <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+                        Add to cart
+                    </button>
+                </div>
+
+            </form>
+
+            <p class="lead">
+                {% if not product.variation_set.all %}
+                    {% if product.promotional_marketing_price %}
+                        <span id="variation-promotional-price" class="lead product-price">
+                            {{ product.promotional_marketing_price|formata_preco }}
+                        </span>
+                        <span id="variation-price" class="lead product-old-price text-muted">
+                            {{ product.marketing_price|formata_preco }}
+                        </span>
+                    {% else %}
+                        <span id="variation-price" class="lead product-price">
+                            {{ product.marketing_price|formata_preco }}
+                        </span>
+                    {% endif %}
+                {% else %}
+                    <span id="variation-promotional-price" class="lead product-price promo-price" style='display: none;'>
+                        {{ product.promotional_marketing_price|formata_preco }}
+                    </span>
+                    <span id="variation-price" class="lead product-price no-promo-price" style='display: none;'>
+                        {{ product.marketing_price|formata_preco }}
+                    </span>
+                    <span id="variation-price" class="lead product-old-price text-muted" style='display: none;'>
+                        {{ product.marketing_price|formata_preco }}
+                    </span>
+                {% endif %}
+            </p>
+
+            <script>
+                (function () {
+                    
+                    select_variation = document.getElementById('select-variations');
+                    variation_price = document.getElementById('variation-price');
+                    variation_promotional_price = document.getElementById('variation-promotional-price');
+                
+                    if (!select_variation) {
+                        return;
+                    }
+                
+                    
+                    select_variation.addEventListener('change', function () {
+                        price = this.options[this.selectedIndex].getAttribute('data-price');
+                        promotional_price = this.options[this.selectedIndex].getAttribute('data-promotional-price');
+                        variation_price.innerHTML = price;
+
+                        if (!promotional_price) {
+                            spanPriceWithPromo = document.getElementsByClassName('promo-price')[0];
+                            spanMutedPrice = document.getElementsByClassName('text-muted')[0];
+                            spanPriceWithPromo.style.display = 'none';
+                            spanMutedPrice.style.display = 'none';
+                            spanNoPromoPrice = document.getElementsByClassName('no-promo-price')[0];
+                            spanNoPromoPrice.classList.remove('product-old-price');
+                            spanNoPromoPrice.style.display = 'block';
+                        }
+                        
+                        else {
+                            spanPriceWithPromo = document.getElementsByClassName('promo-price')[0];
+                            spanMutedPrice = document.getElementsByClassName('text-muted')[0];
+                            spanPriceWithPromo.style.display = 'block';
+                            spanMutedPrice.style.display = 'none';
+                            spanNoPromoPrice = document.getElementsByClassName('no-promo-price')[0];
+                            spanNoPromoPrice.classList.add('product-old-price');
+                            spanNoPromoPrice.style.display = 'block';
+                            variation_promotional_price.innerHTML = promotional_price;
+                        }
+                    })
+                    
+                    
+                })();
+                
+            </script>
+
+
+
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="mt-5 mb-5">
+            <h2 class="text-center">{{ product.name }}</h2>
+            {{ product.long_description|linebreaks }}
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

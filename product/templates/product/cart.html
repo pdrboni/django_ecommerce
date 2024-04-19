@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load omfilters %}
+
+{% block title %}Cart |{% endblock title %}
+
+{% block content %}
+
+{% if cart %}
+
+    <div class="row mt-3">
+        <div class="col">
+            <h3>Cart</h3>
+            <p class="lead">The products and quantities that you've choose.</p>
+
+            {% include "partials/_cart.html" %}
+        </div>
+    </div>
+
+
+
+    <div class="row mt-3">
+        <div class="col-lg">
+            <p class='lead'>Cart total</p>
+
+            <div class='table-responsive'>
+                <table class="table">
+                    <tr>
+                        <td class="font-weight-bold">Total</td>
+                        <td>{{cart|cart_totals|formata_preco}}</td>
+                    </tr>
+                    <tr>
+                        <td> </td>
+                        {% if coupon %}<td style='color:darkgreen'>{{cart|cart_totals|formata_preco}} -{{discount}}% = {{total_with_discount|formata_preco}}</td>{% endif %}
+                    </tr>
+                    <tr>
+                        <td class="font-weight-bold">Discount coupon</td>
+                        <td>
+                            <form method="get" action="{% url 'coupon:coupon' %}">
+                                <input type="text" name="coupon" id="coupon">
+                                <button type="submit">Apply coupon</button>
+                                {% if coupon %}<span>Applied coupon {{coupon}}</span>
+                                <a class="ml-3" href="{% url "coupon:removecoupon" %}">
+                                <i class="fa-times-circle text-danger" aria-hidden="true">remove</i>{% endif %}
+                            </form>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="col-lg mt-auto">
+            <a class="btn btn-lg btn-block btn-primary" href="{% url "product:orderresume" %}">
+                Finish the order
+            </a>
+        </div>
+    </div>
+
+{% else %}
+
+<div class="row mt-3">
+    <div class="col">
+        <h3>Shopping cart</h3>
+        <p class="lead">Your cart is empty.</p>
+        <a class="btn btn-lg btn-block btn-primary" href="{% url "product:list" %}">
+            Back to store
+        </a>
+    </div>
+</div>
+
+{% endif %}
+
+{% endblock content %}
